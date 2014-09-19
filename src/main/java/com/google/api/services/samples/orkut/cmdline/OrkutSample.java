@@ -25,6 +25,7 @@ import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.orkut.Orkut;
+import com.google.api.services.orkut.OrkutScopes;
 import com.google.api.services.orkut.model.CommunityList;
 import com.google.api.services.plus.Plus;
 import com.google.api.services.plus.PlusScopes;
@@ -83,7 +84,7 @@ public class OrkutSample {
         // set up authorization code flow
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
                 httpTransport, JSON_FACTORY, clientSecrets,
-                Collections.singleton(PlusScopes.PLUS_ME)).setDataStoreFactory(
+                Collections.singleton(OrkutScopes.ORKUT)).setDataStoreFactory(
                 dataStoreFactory).build();
         // authorize
         return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
@@ -95,17 +96,11 @@ public class OrkutSample {
             dataStoreFactory = new FileDataStoreFactory(DATA_STORE_DIR);
             // authorization
             Credential credential = authorize();
-            // set up global Plus instance
-            plus = new Plus.Builder(httpTransport, JSON_FACTORY, credential).setApplicationName(
-                    APPLICATION_NAME).build();
             // set up global Orkut instance
             orkut = new Orkut.Builder(httpTransport, JSON_FACTORY, credential).setApplicationName(
                     APPLICATION_NAME).build();
             // run commands
             listCommunities();
-            listActivities();
-            getActivity();
-            getProfile();
             // success!
             return;
         } catch (IOException e) {
