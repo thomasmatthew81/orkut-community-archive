@@ -35,6 +35,13 @@ public class OrkutCommunityArchive {
     }
 
     private void fetchCommunityDetailsAndTopics(Community community){
+        Orkut.CommunityTopics.List commTopicsHandle = orkut.communityTopics().list(community.getId());
+        CommunityTopicList commTopics = commTopicsHandle.execute();
+        for(CommunityTopic topic: commTopics.getItems()){
+            Orkut.CommunityMessages.List topicMsgListHandle = orkut.communityMessages().list(community.getId(),topic.getId());
+            CommunityMessageList topicMsgList = topicMsgListHandle.execute();
+        }
+        
     }
     public static void main(String[] args) {
         OrkutCommunityArchive orkutCommunityArchive = new OrkutCommunityArchive();
