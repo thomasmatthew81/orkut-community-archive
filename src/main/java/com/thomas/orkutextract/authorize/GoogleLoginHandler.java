@@ -12,6 +12,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.orkut.OrkutScopes;
 import com.thomas.orkutextract.config.Inputs;
+import com.thomas.orkutextract.exception.OrkutLoginException;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -36,11 +37,11 @@ public class GoogleLoginHandler {
      * Global instance of the {@link com.google.api.client.util.store.DataStoreFactory}. The best practice is to make it a single
      * globally shared instance across your application.
      */
-    private static FileDataStoreFactory dataStoreFactory;
+    public static FileDataStoreFactory DATA_STORE_FACTORY = initDataStoreFactory();
     /**
      * Global instance of the HTTP transport.
      */
-    private static HttpTransport httpTransport;
+    public static HttpTransport HTTP_TRANSPORT = initHttpTransport();
     /**
      * Global instance of the JSON factory.
      */
@@ -80,28 +81,36 @@ public class GoogleLoginHandler {
         }
         // set up authorization code flow
         GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                httpTransport, JSON_FACTORY, clientSecrets,
+                HTTP_TRANSPORT, JSON_FACTORY, clientSecrets,
                 Collections.singleton(OrkutScopes.ORKUT)).setDataStoreFactory(
-                dataStoreFactory).build();
+                DATA_STORE_FACTORY).build();
         // authorize
         credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize("user");
     }
 
     public Credential getCredential(){return credential;}
 
-    public FileDataStoreFactory getDataStoreFactory() throws IOException {
-        if (null == dataStoreFactory) {
+    private static FileDataStoreFactory initDataStoreFactory() {
+        if (null == DATA_STORE_FACTORY) {
             /** Directory to store user credentials. */
             java.io.File dataStoreDir = new java.io.File(System.getProperty("user.home"), Inputs.USER_CRED_DIR);
-            dataStoreFactory = new FileDataStoreFactory(dataStoreDir);
+            try {
+                DATA_STORE_FACTORY = new FileDataStoreFactory(dataStoreDir);
+            } catch (IOException e) {
+                throw new OrkutLoginException(e);
+            }
         }
-        return dataStoreFactory;
+        return DATA_STORE_FACTORY;
     }
 
-    public HttpTransport getHttpTransport() throws GeneralSecurityException, IOException {
-        if (httpTransport == null) {
-            httpTransport = GoogleNetHttpTransport.newTrustedTransport();
+    private static HttpTransport initHttpTransport() {
+        if (HTTP_TRANSPORT == null) {
+            try {
+                HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
+            } catch (GeneralSecurityException | IOException  e) {
+                throw new OrkutLoginException(e);
+            }
         }
-        return httpTransport;
+        return HTTP_TRANSPORT;
     }
 }

@@ -12,5 +12,7 @@ public interface Inputs {
     //Application Name
     public static final String APP_NAME = "OrkutCommunityArchive";
     //List of Communities to Archive
-    public static final List<String> COMMUNITY_LIST = Arrays.asList("");
+    public static final List<String> COMMUNITY_LIST = Arrays.asList("Vaalikal");
+    //Max result count for any Orkut API fetch
+    public static final long MAX_RESULTS = 100L;
 }
