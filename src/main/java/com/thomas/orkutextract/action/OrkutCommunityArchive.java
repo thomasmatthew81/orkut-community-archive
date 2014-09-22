@@ -26,6 +26,8 @@ public class OrkutCommunityArchive {
     private void fetchAllCommunitiesToBeExported() throws IOException {
         Orkut.Communities.List communityListHandle = orkut.communities().list("me");
         communityListHandle.setMaxResults(Inputs.MAX_RESULTS);
+        communityListHandle.setFields("items(id,name)");
+        //Default set of fileds are not enough
         CommunityList myCommunityList = communityListHandle.execute();
         for(Community community: myCommunityList.getItems()){
             if(Inputs.COMMUNITY_LIST.contains(community.getName())){
@@ -36,23 +38,27 @@ public class OrkutCommunityArchive {
     }
 
     private void fetchCommunityDetailsAndTopics(Community community) throws IOException {
-        //Strart construction of application model for this community;
-        com.thomas.orkutextract.model.Community communityModel = new com.thomas.orkutextract.model.Community(community);
+        //Default set of fields fetched by CommunityList is not enough. Need to make API call on community to get additional details
+        Orkut.Communities.Get  communityPlusHandle = orkut.communities().get(community.getId());
+        Community communityPlus = communityPlusHandle.execute();
+        //Start construction of application model for this community;
+        com.thomas.orkutextract.model.Community communityModel = new com.thomas.orkutextract.model.Community(communityPlus);
+
         Orkut.CommunityMembers.List commMembersHandle = orkut.communityMembers().list(community.getId());
         commMembersHandle.setMaxResults(Inputs.MAX_RESULTS);
         CommunityMembersList commMembers = commMembersHandle.execute();
         communityModel.addMembers(commMembers);
+
         Orkut.CommunityTopics.List commTopicsHandle = orkut.communityTopics().list(community.getId());
         commTopicsHandle.setMaxResults(Inputs.MAX_RESULTS);
         CommunityTopicList commTopics = commTopicsHandle.execute();
         for(CommunityTopic topic: commTopics.getItems()){
-            System.out.println(topic);
             Orkut.CommunityMessages.List topicMsgListHandle = orkut.communityMessages().list(community.getId(),topic.getId());
+            topicMsgListHandle.setMaxResults(Inputs.MAX_RESULTS);
             CommunityMessageList topicMsgList = topicMsgListHandle.execute();
-            System.out.println(topicMsgList);
-            System.out.println("-------------------------------------");
+            communityModel.addTopicMessages(topic,topicMsgList);
         }
-        
+        System.out.println(communityModel);
     }
     public static void main(String[] args) {
         OrkutCommunityArchive orkutCommunityArchive = new OrkutCommunityArchive();
