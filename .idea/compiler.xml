@@ -25,7 +25,9 @@
         <module name="orkut-community-archive" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="1.7" />
+    <bytecodeTargetLevel target="1.7">
+      <module name="orkut-community-archive" target="1.7" />
+    </bytecodeTargetLevel>
   </component>
 </project>
 

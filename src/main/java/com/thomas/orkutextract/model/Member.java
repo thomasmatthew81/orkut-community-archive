@@ -11,7 +11,6 @@ public class Member extends BaseModel{
     public String familyName;
     public String displayName;
     public String gender;
-//    public String birthday; //YYYY-MM-DD
     public String photoUrl;
 
     public Member(OrkutActivitypersonResource orkutActivitypersonResource){
@@ -19,7 +18,6 @@ public class Member extends BaseModel{
         familyName = orkutActivitypersonResource.getName().getFamilyName();
         displayName = givenName.concat(" ").concat(familyName);
         gender = orkutActivitypersonResource.getGender();
-//        birthday = orkutActivitypersonResource.getBirthday();
         photoUrl = orkutActivitypersonResource.getImage().getUrl();
         checkIfFieldsHaveNullValues(this);
     }

@@ -33,7 +33,6 @@ public class Community extends BaseModel {
 
     public void addMembers(CommunityMembersList membersList) {
         for (CommunityMembers commMember : membersList.getItems()) {
-//            Orkut.CommunityMembers.Get commMemberPlus =
             Member member = new Member(commMember.getPerson());
             members.add(member);
         }

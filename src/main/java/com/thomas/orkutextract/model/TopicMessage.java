@@ -12,13 +12,13 @@ public class TopicMessage extends BaseModel{
     public Member author;
     public Date timeAdded;
     public String messageBody;
-    public String subject;
+//    public String subject;
 
     public TopicMessage(CommunityMessage communityMessage){
         author = new Member(communityMessage.getAuthor());
         timeAdded = new Date(communityMessage.getAddedDate().getValue());
         messageBody = communityMessage.getBody();
-        subject = communityMessage.getSubject();
+//        subject = communityMessage.getSubject();
         checkIfFieldsHaveNullValues(this);
     }
 }

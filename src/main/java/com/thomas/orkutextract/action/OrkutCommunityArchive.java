@@ -6,8 +6,14 @@ import com.google.api.services.orkut.model.Community;
 import com.thomas.orkutextract.authorize.GoogleLoginHandler;
 import com.thomas.orkutextract.config.Inputs;
 import com.thomas.orkutextract.model.*;
+import freemarker.ext.beans.BeansWrapper;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 
-import java.io.IOException;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by tx00375 on 9/19/2014.
@@ -23,7 +29,8 @@ public class OrkutCommunityArchive {
                 Inputs.APP_NAME).build();
     }
 
-    private void fetchAllCommunitiesToBeExported() throws IOException {
+    private List<com.thomas.orkutextract.model.Community> fetchAllCommunitiesToBeExported() throws IOException {
+        List<com.thomas.orkutextract.model.Community> communityModelList = new ArrayList<>();
         Orkut.Communities.List communityListHandle = orkut.communities().list("me");
         communityListHandle.setMaxResults(Inputs.MAX_RESULTS);
         communityListHandle.setFields("items(id,name)");
@@ -31,13 +38,13 @@ public class OrkutCommunityArchive {
         CommunityList myCommunityList = communityListHandle.execute();
         for(Community community: myCommunityList.getItems()){
             if(Inputs.COMMUNITY_LIST.contains(community.getName())){
-                fetchCommunityDetailsAndTopics(community);
+                communityModelList.add(fetchCommunityDetailsAndTopics(community));
             }
         }
-
+        return communityModelList;
     }
 
-    private void fetchCommunityDetailsAndTopics(Community community) throws IOException {
+    private com.thomas.orkutextract.model.Community fetchCommunityDetailsAndTopics(Community community) throws IOException {
         //Default set of fields fetched by CommunityList is not enough. Need to make API call on community to get additional details
         Orkut.Communities.Get  communityPlusHandle = orkut.communities().get(community.getId());
         Community communityPlus = communityPlusHandle.execute();
@@ -58,13 +65,30 @@ public class OrkutCommunityArchive {
             CommunityMessageList topicMsgList = topicMsgListHandle.execute();
             communityModel.addTopicMessages(topic,topicMsgList);
         }
-        System.out.println(communityModel);
+        return communityModel;
+    }
+
+    public void renderView(List<com.thomas.orkutextract.model.Community> communityModelList) throws IOException, TemplateException {
+        Configuration configuration = new Configuration();
+        configuration.setClassForTemplateLoading(this.getClass(),"/");
+        Template template = configuration.getTemplate("orkut_community_content.ftl");
+
+        for(com.thomas.orkutextract.model.Community communityModel:communityModelList){
+            System.out.println(System.getProperty("java.io.tmpdir"));
+            Writer out = new OutputStreamWriter(new FileOutputStream(new File(System.getProperty("java.io.tmpdir"), communityModel.name+".html")));
+            //This is to enable freemarker ability to read public fields without having to define getter methods
+            BeansWrapper beansWrapper = new BeansWrapper();
+            beansWrapper.setExposeFields(true);
+            template.process(communityModel,out,beansWrapper);
+            out.flush();
+        }
     }
     public static void main(String[] args) {
         OrkutCommunityArchive orkutCommunityArchive = new OrkutCommunityArchive();
         try {
             orkutCommunityArchive.loginAndSetupGlobalOrkutInstance();
-            orkutCommunityArchive.fetchAllCommunitiesToBeExported();
+            List<com.thomas.orkutextract.model.Community> communityModelList = orkutCommunityArchive.fetchAllCommunitiesToBeExported();
+            orkutCommunityArchive.renderView(communityModelList);
         } catch (Exception e ) {
             e.printStackTrace();
         }
