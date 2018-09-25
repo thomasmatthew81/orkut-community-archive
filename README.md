@@ -18,3 +18,14 @@
 
 1. Throughout the code, the pagination logic has not been implemented. The current implementation is to fetch a max of 100 results for any API call.
     This would fail, if any API call would return more than 100 results. To get all results, pagination logic must be implemented
+
+
+
+Setup a project level ELK(ElasticSearch-Logstash-Kibana) instance to address the developer concerns with not having a centralized logging repository and to achieve cost benefits by not using Splunk
+Built a wrapper around QuickFixJ to easily use as a spring module. This enabled compatibility with existing spring based application. 
+
+Setup Teamcity based CI environment to address the deficiencies in the Jenkins instance provided by the organization. Created a build-analyze-test-deploy workflow to enable faster deployments.
+
+RAVE
+Used the DDD(Domain Driven Design) approach to accurately translate the business requirement to code artifacts.
+Implemented a maven submodule to enforce coding best practices for all developers in the application. The submodule consisted of PMD,checkstlye,findbugs and standardized logback configuration files
